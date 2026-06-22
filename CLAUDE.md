@@ -20,21 +20,39 @@ later version」）。這不是建議，是法律義務：
   把任何檔案重新授權。
 - 保留所有原始著作權標頭與授權文字。每個原始檔開頭的 GPL 標頭、Justin Davis 與
   ImageWriter developers 的著作權行、SourceForge 連結都必須原樣保留，不可刪除或改寫。
-- 標註你的修改（GPL §2a）。修改任何既有檔案時，要讓變更可追溯：
-  - 每個 bug 修正用獨立、訊息清楚的 commit。
-  - 在 `Changelog.txt` 最上方的 fork 版本段落記錄改了什麼。
-  - 對既有檔案做實質修改時，可在該檔標頭原著作權行下方加一行
-    `Copyright (C) 2026 Frank`，不要動到上游既有的著作權行。
-- 新增的檔案：沿用相同的 GPL 標頭，著作權行寫
-  `Copyright (C) 2026 Frank`。
-- 發布二進位檔的義務：若提供編譯好的 `.exe`，必須一併提供對應的完整原始碼
-  （放在這個 GitHub repo 即滿足）。
-- 第三方元件 Qt 是 LGPL-2.1。原始碼層面沒問題；但若 Release 附帶 Qt DLL，必須遵守
-  LGPL——附上 LGPL 文字、確保使用者能替換或重新連結 Qt，不要把 Qt 靜態連進執行檔。
-  MinGW runtime 依其各自授權。
+- 標註你的修改（GPL §2a）。所有改動都要可追溯——具體要更新哪些檔案、怎麼填，
+  見下方「改動後要維護的文件（checklist）」。
+- 發布二進位檔要附對應的完整原始碼（push 到本 repo 即滿足）；若打包 Qt DLL，需另
+  遵守 LGPL-2.1。第三方 Qt 為 LGPL-2.1、MinGW runtime 依其各自授權。執行細節同見
+  下方 checklist。
 
 簡言之：可以自由修改與再發布，但要保留授權與所有原始聲明、清楚標註自己的修改、
 整體維持 GPL。
+
+## 改動後要維護的文件（checklist）
+
+任何程式碼改動：
+- 在改到的既有檔案標頭，原著作權行下方加 `Copyright (C) 2026 Frank`
+  （該檔第一次被本 fork 改到時加，之後不必重複），不要動到上游既有著作權行。
+- 新增檔案：沿用相同的 GPL 標頭，著作權行寫 `Copyright (C) 2026 Frank`。
+- commit 訊息清楚描述改了什麼、為什麼。
+- 在 `Changelog.txt` 最上方「Release 1.0.x (fork)」段補一條說明。
+
+改到使用者可見字串（UI 文字）：
+- 更新 `src/lang/diskimager_en.ts`（基準）及其他語言檔，必要時標 unfinished。
+- lrelease 產生對應 `.qm`（build 時 `.pro` 會自動跑 lrelease）。
+
+發新版本（bump version）時，這幾處要同步：
+- `src/DiskImager.pro` 的 VERSION
+- `src/DiskImager.rc` 的 FILEVERSION / PRODUCTVERSION 及 FileVersion / ProductVersion 字串
+- `Changelog.txt` 開新的 Release 段
+- `README.md` 內提到版本之處
+- 註：`setup.iss` 用 GetStringFileInfo 從 exe 自動讀版本，不必手改
+
+發布 binary / GitHub Release 時：
+- 一併提供對應原始碼（GPL 義務；push 到本 repo 即滿足）
+- 隨附 `GPL-2`、`LGPL-2.1`、`License.txt`
+- 若打包 Qt DLL，附 `LGPL-2.1` 文字並確保使用者能替換/重連結 Qt
 
 ## 程式碼地圖
 
@@ -61,16 +79,13 @@ clean.bat     :: 清理 build 產物
 
 ## 開發慣例與注意事項
 
-- Commit：每個修正獨立 commit，訊息說清楚改了什麼與為什麼（同時滿足 GPL 修改標註）。
-  第一個 commit 是未修改的上游基準，方便 diff 出本 fork 的改動。
+改動後要更新哪些文件，見上方「改動後要維護的文件（checklist）」。以下是純技術注意：
+
+- 第一個 commit 是未修改的上游基準，方便 diff 出本 fork 的改動；每個修正用獨立 commit。
 - 換行：repo 內檔案原始為 LF，git blob 保留 LF。`.bat` 檔在 Windows 需要 CRLF，
   不要對它們做 LF 正規化。
 - 含中文/CJK 的檔案（特別是 `src/lang/*.ts`）一律用 Edit / Write 工具修改；
   在 Windows 上避免用未指定 encoding 的 PowerShell `Get-Content -Raw` 做替換，會
   產生 mojibake。
-- 修改字串後要更新翻譯：新字串需同步進 `.ts` 檔（Qt Linguist）並 lrelease 成 `.qm`。
-- 版本號散落在多處，改版本時一起更新：`src/DiskImager.pro`（VERSION）、
-  `src/DiskImager.rc`（FILEVERSION / PRODUCTVERSION / 字串）、`Changelog.txt`、
-  `README.md`。
 - `*.pro.user`、`build*/`、`Release/`、`Debug/`、`*.exe`、`*.dll`、`*.qm` 已在
   `.gitignore` 內，不要 commit。
