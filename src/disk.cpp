@@ -15,6 +15,7 @@
  *  Copyright (C) 2009, Justin Davis <tuxdavis@gmail.com>             *
  *  Copyright (C) 2009-2017 ImageWriter developers                    *
  *                 https://sourceforge.net/projects/win32diskimager/  *
+ *  Copyright (C) 2026 Frank                                          *
  **********************************************************************/
 
 #ifndef WINVER
@@ -419,6 +420,28 @@ bool GetMediaType(HANDLE hDevice)
     return false;
 }
 
+// Return true only if drive letter 'driveLetter' (e.g. 'G') maps to a real
+// physical-disk volume.  Virtual filesystems (Google Drive for Desktop),
+// network redirectors, SUBST and RAM disks resolve to other NT device targets
+// and must be skipped: probing them below with disk/storage IOCTLs can crash
+// the app.  QueryDosDevice is a pure user-mode lookup that neither opens the
+// device nor issues IOCTLs, so it is safe even against such drivers.
+static bool isPhysicalDiskVolume(char driveLetter)
+{
+    wchar_t deviceName[3] = { (wchar_t)driveLetter, L':', L'\0' };
+    wchar_t targetPath[MAX_PATH];
+    DWORD len = QueryDosDeviceW(deviceName, targetPath, MAX_PATH);
+    if (len == 0)
+    {
+        // The letter came from GetLogicalDrives so it exists; a failure here
+        // is rare (e.g. buffer too small for a long network target).  Prefer
+        // "never crash" over "never miss" and treat it as non-physical.
+        return false;
+    }
+    QString target = QString::fromWCharArray(targetPath);
+    return target.startsWith(QLatin1String("\\Device\\HarddiskVolume"), Qt::CaseInsensitive);
+}
+
 bool checkDriveType(char *name, ULONG *pid)
 {
     HANDLE hDevice;
@@ -429,6 +452,15 @@ bool checkDriveType(char *name, ULONG *pid)
     char *nameNoSlash;
     int driveType;
     DWORD cbBytesReturned;
+
+    // Skip any drive that is not backed by a real physical disk (Google Drive
+    // virtual drive, network share, SUBST, RAM disk).  name is "\\.\X:\", so
+    // name[4] is the drive letter.  Doing this before opening a handle avoids
+    // sending storage IOCTLs to a virtual filesystem driver, which crashes.
+    if ( !isPhysicalDiskVolume(name[4]) )
+    {
+        return(retVal);
+    }
 
     // some calls require no tailing slash, some require a trailing slash...
     if ( !(slashify(name, &nameWithSlash, &nameNoSlash)) )

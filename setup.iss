@@ -38,13 +38,16 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "Release\Win32DiskImager.exe"; DestDir: "{app}"; Flags: ignoreversion
+; Bundle the entire windeployqt output recursively: the exe plus the Qt6 DLLs
+; and every plugin subfolder it emits (platforms, styles, tls, imageformats,
+; iconengines, ...).  Assemble the release-built, windeployqt'd files into
+; Release\ before compiling this script.  The app's own translations are
+; embedded via translations.qrc, so there are no loose .qm files to ship.
+Source: "Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "Changelog.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "GPL-2"; DestDir: "{app}"; Flags: ignoreversion
 Source: "LGPL-2.1"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Release\platforms\*.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion
-Source: "Release\translations\*.qm"; DestDir: "{app}\translations"; Flags: ignoreversion
+Source: "License.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "README.txt"; DestDir: "{app}"; Flags: ignoreversion isreadme
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

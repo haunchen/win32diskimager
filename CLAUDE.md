@@ -7,7 +7,10 @@
 這是 Win32 Disk Imager 的非官方 fork，維護者 Frank（GitHub: @haunchen）。
 原專案是把 raw image（`.img`）讀寫到 SD / USB 裝置的 Windows 工具，需要系統管理員權限執行。
 
-- 語言/框架：C++ 搭配 Qt 5.7 + MinGW 5.3，qmake 建置。
+- 語言/框架：C++ 搭配 Qt 6（本機實測以 Qt 6.10.3 + MinGW 13.1.0 64-bit 建置通過），
+  qmake 建置。注意：原始碼用了 `Qt::SkipEmptyParts`（Qt 5.14+）與 Qt 6 風格的
+  `nativeEvent(..., qintptr*)`（宣告為 `long long*`，對應 64-bit Windows 的 qintptr），
+  因此需要 Qt 6 / 至少 Qt 5.14，無法用 Qt 5.7 編譯。
 - 上游版本：1.0.0（SourceForge）。本 fork 從 SourceForge master 的未修改原始碼開始（見第一個 commit）。
 - 原作者：Justin Davis <tuxdavis@gmail.com>；上游由 ImageWriter developers 維護。
 
@@ -76,6 +79,14 @@ clean.bat     :: 清理 build 產物
 
 或用 Qt Creator 開 `src/DiskImager.pro`。程式需要系統管理員權限執行，除錯時請以
 管理員身分啟動 Qt Creator。
+
+建置陷阱（Windows）：`DiskImager.pro` 在 qmake 階段會逐一跑 lrelease 把 `.ts` 轉
+`.qm`。若 PATH 上有 Git 的 `C:\Program Files\Git\bin\sh.exe`，qmake 會切成 Unix
+shell 模式、用單引號包住 lrelease 路徑，而 qmake 實際以 cmd.exe 執行、cmd 不認單引號，
+於是報 `Failed to run: '...lrelease.exe' ...`。解法：build 用的 PATH 不要含 Git 的
+`bin`（Qt Creator 在 Projects → Build Environment 把該段移除；命令列用乾淨 PATH，例如
+`<Qt>\mingw_64\bin;<Qt>\Tools\mingw1310_64\bin;C:\Windows\System32;C:\Windows`）。
+要產出可獨立執行的 exe，編完後用 `windeployqt` 帶齊 Qt6 DLL。
 
 ## 開發慣例與注意事項
 
