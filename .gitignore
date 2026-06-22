@@ -1,7 +1,9 @@
 Debug/
 Release/
 build*/
+Output/
 *.exe
+*.zip
 *.pro.user*
 *dll
 *qm
