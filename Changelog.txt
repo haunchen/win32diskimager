@@ -8,7 +8,10 @@ copyright notices. Per GPL section 2(a), changes made in this fork are recorded
 below and in the modified source files.
 
 Changes in this fork:
-- (TODO: list bug fixes here as they are made)
+- 修正裝有 Google Drive（或其他以固定磁碟身分回報的虛擬磁碟）時，
+  程式一啟動即崩潰的問題。磁碟列舉改為先以 QueryDosDevice 確認磁碟機
+  對應到實體磁碟卷（\Device\HarddiskVolume），非實體者（虛擬碟、網路碟、
+  SUBST、RAM 碟）一律跳過，不再對其送出磁碟／儲存 IOCTL。
 
 
 Release 1.0.0
