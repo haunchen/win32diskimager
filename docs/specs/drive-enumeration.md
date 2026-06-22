@@ -1,6 +1,6 @@
 ---
 domain: drive-enumeration
-status: draft
+status: active
 created: 2026-06-22
 last_modified: 2026-06-22
 ---
@@ -63,7 +63,3 @@ last_modified: 2026-06-22
 - **Decision**: `QueryDosDevice` 回傳失敗時，視為非實體磁碟而跳過。
 - **Rationale**: 磁碟機代號來自 `GetLogicalDrives`、必定存在，失敗極罕見；以「絕不崩潰」優先於「絕不漏列」。
 - **Date**: 2026-06-22
-
-## Pending Changes
-
-<!-- Brownfield delta 放這裡，finish spec sync 時清除 -->
