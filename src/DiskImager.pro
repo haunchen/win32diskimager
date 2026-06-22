@@ -16,6 +16,7 @@
 #  Copyright (C) 2009, Justin Davis <tuxdavis@gmail.com>
 #  Copyright (C) 2009-2017 ImageWriter developers
 #                 https://sourceforge.net/projects/win32diskimager/
+#  Copyright (C) 2026 Frank
 ###################################################################
 TEMPLATE = app
 TARGET = ../../Win32DiskImager
@@ -24,7 +25,7 @@ INCLUDEPATH += .
 #CONFIG += release
 DEFINES -= UNICODE
 QT += widgets
-VERSION = 1.0
+VERSION = 1.0.1
 VERSTR = '\\"$${VERSION}\\"'
 DEFINES += VER=\"$${VERSTR}\"
 DEFINES += WINVER=0x0601
